@@ -2489,8 +2489,12 @@ bool Planner::_populate_block(
         if (e_D_ratio > 3.0f)
           use_advance_lead = false;
         else {
+          // Print acceleration limit is LA_EJERK/K/(height*width)×filament_area
+          // Example: For 25 E jerk, 0.2 line height, 0.5 line width, 1.75mm filament, 0.2 K
+          // the limit is 25÷0.2÷0.2÷0.5×(pi×1.75^2÷4) ~= 3000mm/s^2
+          #define LA_EXTRA_JERK 30
           // Scale E acceleration so that it will be possible to jump to the advance speed.
-          const uint32_t max_accel_steps_per_s2 = MAX_E_JERK(extruder) / (extruder_advance_K[E_INDEX_N(extruder)] * e_D_ratio) * steps_per_mm;
+          const uint32_t max_accel_steps_per_s2 = (MAX_E_JERK(extruder) + LA_EXTRA_JERK) / (extruder_advance_K[E_INDEX_N(extruder)] * e_D_ratio) * steps_per_mm;
           if (accel > max_accel_steps_per_s2) {
             accel = max_accel_steps_per_s2;
             if (ENABLED(LA_DEBUG)) SERIAL_ECHOLNPGM("Acceleration limited.");
