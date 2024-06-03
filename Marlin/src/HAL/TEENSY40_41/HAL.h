@@ -182,9 +182,9 @@ public:
   static void reboot();        // Restart the firmware from 0x0
 
   // Interrupts
-  static bool isr_state() { return !__get_primask(); }
-  static void isr_on()  { __enable_irq(); }
-  static void isr_off() { __disable_irq(); }
+  FORCE_INLINE static bool isr_state() { return !__get_primask(); }
+  FORCE_INLINE static void isr_on()  { __enable_irq(); }
+  FORCE_INLINE static void isr_off() { __disable_irq(); }
 
   static void delay_ms(const int ms) { delay(ms); }
 

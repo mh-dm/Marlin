@@ -190,9 +190,11 @@ public:
 
   // Interrupts
   static portMUX_TYPE spinlock;
-  static bool isr_state() { return spinlock.owner == portMUX_FREE_VAL; }
-  static void isr_on()  { if (spinlock.owner != portMUX_FREE_VAL) portEXIT_CRITICAL(&spinlock); }
-  static void isr_off() { portENTER_CRITICAL(&spinlock); }
+  FORCE_INLINE static bool isr_state() { return spinlock.owner == portMUX_FREE_VAL; }
+  FORCE_INLINE static void isr_on() {
+    if (spinlock.owner != portMUX_FREE_VAL) portEXIT_CRITICAL(&spinlock);
+  }
+  FORCE_INLINE static void isr_off() { portENTER_CRITICAL(&spinlock); }
 
   static void delay_ms(const int ms) { _delay_ms(ms); }
 

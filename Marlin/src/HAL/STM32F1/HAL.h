@@ -256,9 +256,9 @@ public:
   static void reboot();        // Restart the firmware from 0x0
 
   // Interrupts
-  static bool isr_state() { return !__get_primask(); }
-  static void isr_on()  { ((void)__iSeiRetVal()); }
-  static void isr_off() { ((void)__iCliRetVal()); }
+  FORCE_INLINE static bool isr_state() { return !__get_primask(); }
+  FORCE_INLINE static void isr_on()  { ((void)__iSeiRetVal()); }
+  FORCE_INLINE static void isr_off() { ((void)__iCliRetVal()); }
 
   static void delay_ms(const int ms) { delay(ms); }
 

@@ -61,9 +61,9 @@ public:
   static void reboot();     // Restart the firmware from 0x0
 
   // Interrupts
-  static bool isr_state();
-  static void isr_on();
-  static void isr_off();
+  FORCE_INLINE static bool isr_state();
+  FORCE_INLINE static void isr_on();
+  FORCE_INLINE static void isr_off();
 
   static void delay_ms(const int ms);
 
