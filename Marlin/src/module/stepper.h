@@ -479,7 +479,7 @@ class Stepper {
     }
 
     // The ISR scheduler
-    static void isr();
+    FORCE_INLINE static void isr();
 
     // The stepper pulse ISR phase
     static void pulse_phase_isr();

@@ -1664,12 +1664,12 @@ void Stepper::isr() {
     hal.isr_off();
 
     /**
-     * Get the current tick value + margin
-     * Assuming at least 6µs between calls to this ISR...
-     * On AVR the ISR epilogue+prologue is estimated at 100 instructions - Give 8µs as margin
-     * On ARM the ISR epilogue+prologue is estimated at 20 instructions - Give 1µs as margin
+     * Add margin to ensure the next ISR is scheduled right *after* re-enabling interrupts
+     * AVR: On ATMEGA1284P the minimum working is TODO cycles - Give 128 cycles as margin
+     * ARM/32-bit: On LPC1769 the minimum working is 56 cycles - Give 80 cycles as margin
      */
-    min_ticks = HAL_timer_get_count(MF_TIMER_STEP) + hal_timer_t(TERN(__AVR__, 8, 1) * (STEPPER_TIMER_TICKS_PER_US));
+	  constexpr hal_timer_t added_margin_ticks = TERN(__AVR__, 128, 80) / STEPPER_TIMER_PRESCALE;
+    min_ticks = HAL_timer_get_count(MF_TIMER_STEP) + added_margin_ticks;
 
     // Advance pulses if not enough time to wait for the next ISR or we've hit the loop limit.
     // We limit to max_loop iterations to avoid timer (and 'next_isr_ticks') overflow and to
@@ -1678,8 +1678,7 @@ void Stepper::isr() {
 
   #if DISABLED(OLD_ADAPTIVE_MULTISTEPPING) && MULTISTEPPING_LIMIT > 1
     // Track the time spent in the ISR
-    const hal_timer_t time_spent = HAL_timer_get_count(MF_TIMER_STEP);
-    time_spent_in_isr += time_spent;
+    time_spent_in_isr += min_ticks;
 
     if (next_isr_ticks < min_ticks) {
       next_isr_ticks = min_ticks;
@@ -1694,7 +1693,7 @@ void Stepper::isr() {
     else {
       // Track the time spent voluntarily outside the ISR
       time_spent_out_isr += next_isr_ticks;
-      time_spent_out_isr -= time_spent;
+      time_spent_out_isr -= min_ticks;
     }
   #else
     NOLESS(next_isr_ticks, min_ticks);
